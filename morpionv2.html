@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #Jeu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            width: 600px;
+            height: 600px;
+            margin: auto;
+        }
+
+        .case {
+            height: 200px;
+            width: 200px;
+            border: 1px solid black;
+            font-size: 3em;
+            padding: 0;
+            border-radius: 15%;
+        }
+        .case img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            vertical-align: bottom; 
+            animation: appear 0.2s;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.8s, color 0.8s, transform 0.8s;
+        }
+        h1{
+            text-align: center;
+        }
+        p {
+           text-align: center;
+           margin-top: 3em;
+        }
+        #J1, #J2{
+            font-size: 2em;
+            text-align: center;
+            margin-top: 1em;
+        }
+
+        .combinaison{
+            background-color: rgba(67, 253, 129, 0.397);
+        }
+        .null{
+            background-color: rgba(245, 28, 28, 0.534);
+        }
+
+        #replay{
+            background-color: royalblue;
+            font-size: 2em;
+            border-radius: 10%;
+            color: white;
+        }
+        #gagnant{
+            /* transition: transform .5s; */
+            animation: gagne 8s ease-in;
+            scale: (1);
+            color: red;
+        }
+        @keyframes appear {
+            from {
+            transform: scale(0) rotate(180deg);
+            }
+            to {
+            transform: scale(1) rotate(0deg);
+            }
+        }
+        @keyframes gagne {
+            from {
+                transform: scale(1) ;
+            }
+            
+            to {
+                transform: scale(4);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    
+    <h1 id="tour"></h1>
+    <h1 id="gagnant"></h1>
+    <div id="Jeu">
+        <button onclick="cliqueCase(this)" class="case" id="1"></button>
+        <button onclick="cliqueCase(this)" class="case" id="2"></button>
+        <button onclick="cliqueCase(this)" class="case" id="3"></button>
+        <button onclick="cliqueCase(this)" class="case" id="4"></button>
+        <button onclick="cliqueCase(this)" class="case" id="5"></button>
+        <button onclick="cliqueCase(this)" class="case" id="6"></button>
+        <button onclick="cliqueCase(this)" class="case" id="7"></button>
+        <button onclick="cliqueCase(this)" class="case" id="8"></button>
+        <button onclick="cliqueCase(this)" class="case" id="9"></button>
+    </div>
+    <div id="J1" ></div>
+    <div id="J2"></div>
+    <p>
+        <button id="replay">REJOUER</button>
+    </p>
+    <script>
+        
+        let joueur1 = {
+            nom: "",
+            symbole : "<img src = 'image/croix.png'>",
+            score: 0
+        }
+        while(joueur1.nom.length <=2){
+            joueur1.nom = prompt("Ton nom, camarade joueur 1 :")
+        }
+        
+        let joueur2 = {
+            nom: "",
+            symbole : "<img src = 'image/rond.png'>",
+            score: 0
+        }
+        while(joueur2.nom.length <=2){
+            joueur2.nom = prompt("Ton nom, camarade joueur 2 :")
+        }
+        let joueurEnCours = joueur1
+
+        let counter = 0
+        let caseX = []
+        let caseO = []
+        let combinaisonGagnate = [
+            [1, 4, 7],
+            [2, 5, 8],
+            [3, 6, 9],
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+            [3, 5, 7],
+            [1, 5, 9]
+        ]
+              
+        
+        function rejou(){
+
+            document.querySelectorAll(".case").forEach(cell => {
+                cell.innerText = ""
+                cell.classList.remove("combinaison")
+                cell.classList.remove("null")
+                counter = 0
+                
+            })
+            
+            caseX = []
+            caseO = []
+            partieCours = true
+            document.querySelector("#gagnant").innerText = ""
+            
+            
+            
+        }
+        let partieCours = true
+        const cliqueCase = function (cliqueElement) {
+            counter++
+            const id = parseInt(cliqueElement.id)
+            if (partieCours == false) {
+                return
+            }
+
+            if (caseX.includes(id) || caseO.includes(id)) {
+                return
+            }
+            
+            cliqueElement.innerHTML = joueurEnCours.symbole
+            joueurEnCours == joueur1 ? caseX.push(id) : caseO.push(id)
+               
+            for (let gagnant of combinaisonGagnate) {
+                let count = 0
+                let caseVerifiee = joueurEnCours == joueur1 ? caseX : caseO
+                for (let element of caseVerifiee) {
+                    if (gagnant.includes(element)) { count += 1 }
+                }
+                if (count === 3) {
+                    for(let index of gagnant){
+                        document.getElementById(index).classList.add("combinaison")
+                    }
+                    partieCours = false
+                    
+                    
+                    document.querySelector("#gagnant").innerText = " Gagnant Joueur "+joueurEnCours.nom
+
+                    joueurEnCours.score++
+                   
+                }
+                else if(counter == 9){
+                   document.querySelector("#gagnant").innerText = "MATCH NUL"
+                   document.querySelectorAll(".case").forEach(cell => {
+                        
+                        cell.classList.add("null")
+                    })
+                   
+                }
+            }
+
+            joueurEnCours = joueurEnCours == joueur1 ? joueur2 : joueur1
+            affichage()
+            
+        }
+        affichage()
+
+        let btn = document.querySelector("#replay")
+        btn.addEventListener("click", () =>  rejou())
+        
+        function affichage(){
+            document.querySelector("#J1").innerText = "Score de "+joueur1.nom+" : "+joueur1.score
+            document.querySelector("#J2").innerText = "Score de "+joueur2.nom+" : "+joueur2.score
+            document.querySelector("#tour").innerText = "C'est au tour de "+joueurEnCours.nom
+        }
+
+    </script>
+</body>
+
+</html>
